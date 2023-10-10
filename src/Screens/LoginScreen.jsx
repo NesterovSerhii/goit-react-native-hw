@@ -1,19 +1,25 @@
+import { useState } from "react";
 import {
   ImageBackground,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
-    View,
+    View
 } from "react-native";
 import Input from "../components/Input";
-import Button from "../components/btn";
+import CustomButton from "../components/btn";
 
 const LoginScreen = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [isKeyboardShowing, setIsKeyboardShowing] = useState(false);
+
+  const toggleShowPassword = () => setShowPassword((prev) => !prev);
   return (
-    <TouchableWithoutFeedback>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <ImageBackground
           source={require("../assets/images/backgroundIMG.jpg")}
@@ -23,16 +29,38 @@ const LoginScreen = () => {
             behavior={Platform.OS == "ios" ? "padding" : ""}
           >
             <View
-              style={styles.wrapper}
+              style={
+                isKeyboardShowing
+                  ? { ...styles.wrapper, paddingBottom: 0 }
+                  : styles.wrapper
+              }
             >
               <Text style={styles.title}>Увійти</Text>
               <View style={styles.formWrapper}>
                 <Input
                   placeholder="Адреса електронної пошти"
+                  onFocus={() => {
+                    setIsKeyboardShowing(true);
+                  }}
+                  onBlur={() => {
+                    setIsKeyboardShowing(false);
+                  }}
                 />
                 <View style={{ position: "relative" }}>
                   <Input
                     placeholder="Пароль"
+                    secureTextEntry={showPassword && true}
+                    onFocus={() => {
+                      setIsKeyboardShowing(true);
+                    }}
+                    onBlur={() => {
+                      setIsKeyboardShowing(false);
+                    }}
+                    styleProps={{
+                      ...(showPassword
+                        ? { paddingRight: 100 }
+                        : { paddingRight: 90 }),
+                    }}
                   />
                   <TouchableOpacity
                     activeOpacity={0.6}
@@ -48,22 +76,29 @@ const LoginScreen = () => {
                         fontSize: 16,
                       }}
                     >
+                      {showPassword ? "Показати" : "Приховати"}
                     </Text>
                   </TouchableOpacity>
                 </View>
-                  <Button
+                {!isKeyboardShowing && (
+                  <CustomButton
                     text={"Увійти"}
+                    styleProps={
+                      isKeyboardShowing ? { marginTop: 0 } : { marginTop: 27 }
+                    }
                   />
-                
+                )}
               </View>
+              {!isKeyboardShowing && (
                 <TouchableOpacity activeOpacity={0.7}>
                   <Text style={styles.noAccountMessage}>
                     Немає акаунту?&nbsp;
-                    <Text style={{ textDecorationLine: "underline" }}>
+                       <Text style={{ textDecorationLine: "underline" }}>
                        Зареєструватися
                     </Text>
                   </Text>
                 </TouchableOpacity>
+              )}
             </View>
           </KeyboardAvoidingView>
         </ImageBackground>
@@ -75,7 +110,6 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: '100%',
   },
   bgImg: {
     flex: 1,

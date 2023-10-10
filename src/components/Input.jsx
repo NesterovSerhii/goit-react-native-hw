@@ -3,13 +3,23 @@ import React from "react";
 
 const Input = ({
   placeholder,
+  value,
+  onChangeText,
+  secureTextEntry,
+  onFocus,
+  onBlur,
   styleProps,
 }) => {
   return (
     <TextInput
       placeholder={placeholder}
       style={{ ...styles.input, ...styleProps }}
+      value={value}
+      onChangeText={onChangeText}
+      secureTextEntry={secureTextEntry}
       placeholderTextColor={"#BDBDBD"}
+      onFocus={onFocus}
+      onBlur={onBlur}
     />
   );
 };

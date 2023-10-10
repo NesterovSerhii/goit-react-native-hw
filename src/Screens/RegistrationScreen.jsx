@@ -1,6 +1,8 @@
+import { useState } from "react";
 import {
   Image,
   ImageBackground,
+  Keyboard,
   KeyboardAvoidingView,
   StyleSheet,
   Text,
@@ -9,12 +11,17 @@ import {
   View,
 } from "react-native";
 import Input from "../components/Input";
-import Button from "../components/btn";
+import CustomButton from "../components/btn";
 
 const RegistrationScreen = () => {
+  
+  const [isKeyboardShowing, setIsKeyboardShowing] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+ const toggleShowPassword = () => setShowPassword((prev) => !prev);
 
   return (
-    <TouchableWithoutFeedback>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <ImageBackground
           source={require("../assets/images/backgroundIMG.jpg")}
@@ -24,7 +31,11 @@ const RegistrationScreen = () => {
             behavior={Platform.OS == "ios" ? "padding" : ""}
           >
             <View
-              style={styles.wrapper}
+              style={
+                isKeyboardShowing
+                  ? { ...styles.wrapper, paddingBottom: 0 }
+                  : styles.wrapper
+              }
             >
               <View style={styles.userAvatar}>
                 <TouchableOpacity
@@ -38,13 +49,37 @@ const RegistrationScreen = () => {
               <View style={styles.formWrapper}>
                 <Input
                   placeholder="Логін"
+                  onFocus={() => {
+                    setIsKeyboardShowing(true);
+                  }}
+                  onBlur={() => {
+                    setIsKeyboardShowing(false);
+                  }}
                 />
                 <Input
                   placeholder="Адреса електронної пошти"
+                  onFocus={() => {
+                    setIsKeyboardShowing(true);  
+                  }}
+                  onBlur={() => {
+                    setIsKeyboardShowing(false);          
+                  }}           
                 />
                 <View style={{ position: "relative" }}>
                   <Input
                     placeholder="Пароль"
+                   secureTextEntry={showPassword && true}
+                    onFocus={() => {
+                      setIsKeyboardShowing(true);            
+                    }}
+                    onBlur={() => {
+                      setIsKeyboardShowing(false);
+                    }}
+                    styleProps={{             
+                      ...(showPassword
+                        ? { paddingRight: 100 }
+                        : { paddingRight: 90 }),
+                    }}
                   />
                   <TouchableOpacity
                     activeOpacity={0.6}
@@ -52,28 +87,29 @@ const RegistrationScreen = () => {
                       position: "absolute",
                       right: 16,
                       top: 17,
-                    }}
-                  >
+                    }} >
                     <Text
                       style={{
                         color: "#1B4371",
                         fontSize: 16,
-                      }}
-                    >
+                      }} >
+                         {showPassword ? "Показати" : "Приховати"}
                     </Text>
                   </TouchableOpacity>
                 </View>
-                  <Button
+                {!isKeyboardShowing && (
+                  <CustomButton
                     text={"Зареєстуватися"}
                     styleProps={{ marginTop: 27 }}
-                  />
+                  /> )}
               </View>
+              {!isKeyboardShowing && (
                 <TouchableOpacity activeOpacity={0.7}>
                   <Text style={styles.noAccountMessage}>
                     Вже є акаунт?&nbsp;
                     <Text>Увійти</Text>
                   </Text>
-                </TouchableOpacity>
+                </TouchableOpacity>)}
             </View>
           </KeyboardAvoidingView>
         </ImageBackground>
@@ -85,7 +121,6 @@ const RegistrationScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: '100%',
   },
   userAvatar: {
     position: "absolute",
@@ -107,7 +142,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    paddingBottom: 45,
+    paddingBottom: 78,
   },
   title: {
     color: "#212121",
