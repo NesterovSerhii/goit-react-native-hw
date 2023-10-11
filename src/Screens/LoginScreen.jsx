@@ -8,16 +8,28 @@ import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
-    View
+  View, 
+  Linking
 } from "react-native";
 import Input from "../components/Input";
 import CustomButton from "../components/btn";
 
 const LoginScreen = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isKeyboardShowing, setIsKeyboardShowing] = useState(false);
 
   const toggleShowPassword = () => setShowPassword((prev) => !prev);
+
+  const onLogin = () => {
+    setEmail("");
+    setPassword("");
+    console.log(`Email: ${email}\nPassword: ${password}`);
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
@@ -39,24 +51,42 @@ const LoginScreen = () => {
               <View style={styles.formWrapper}>
                 <Input
                   placeholder="Адреса електронної пошти"
+                  value={email}
+                  onChangeText={setEmail}
                   onFocus={() => {
                     setIsKeyboardShowing(true);
+                    setIsEmailFocused(true);
                   }}
                   onBlur={() => {
                     setIsKeyboardShowing(false);
+                    setIsEmailFocused(false);
                   }}
+                  styleProps={
+                    isEmailFocused && {
+                      borderColor: "#FF6C00",
+                      backgroundColor: "#fff",
+                    }
+                  }
                 />
                 <View style={{ position: "relative" }}>
                   <Input
                     placeholder="Пароль"
+                    value={password}
+                    onChangeText={setPassword}
                     secureTextEntry={showPassword && true}
                     onFocus={() => {
                       setIsKeyboardShowing(true);
+                      setIsPasswordFocused(true);
                     }}
                     onBlur={() => {
                       setIsKeyboardShowing(false);
+                      setIsPasswordFocused(false);
                     }}
                     styleProps={{
+                      ...(isPasswordFocused && {
+                        borderColor: "#FF6C00",
+                        backgroundColor: "#fff",
+                      }),
                       ...(showPassword
                         ? { paddingRight: 100 }
                         : { paddingRight: 90 }),
@@ -69,6 +99,7 @@ const LoginScreen = () => {
                       right: 16,
                       top: 17,
                     }}
+                    onPress={toggleShowPassword}
                   >
                     <Text
                       style={{
@@ -86,6 +117,7 @@ const LoginScreen = () => {
                     styleProps={
                       isKeyboardShowing ? { marginTop: 0 } : { marginTop: 27 }
                     }
+                    onPress={onLogin}
                   />
                 )}
               </View>

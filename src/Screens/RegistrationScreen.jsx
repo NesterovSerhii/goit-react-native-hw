@@ -15,10 +15,23 @@ import CustomButton from "../components/btn";
 
 const RegistrationScreen = () => {
   
-  const [isKeyboardShowing, setIsKeyboardShowing] = useState(false);
+  const [login, setLogin] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [isLoginFocused, setIsLoginFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isKeyboardShowing, setIsKeyboardShowing] = useState(false);
 
- const toggleShowPassword = () => setShowPassword((prev) => !prev);
+  const toggleShowPassword = () => setShowPassword((prev) => !prev);
+
+  const onRegistration = () => {
+    setLogin("");
+    setEmail("");
+    setPassword("");
+    console.log(`Login: ${login}\nEmail: ${email}\nPassword: ${password}`);
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -49,33 +62,61 @@ const RegistrationScreen = () => {
               <View style={styles.formWrapper}>
                 <Input
                   placeholder="Логін"
+                  value={login}
+                  onChangeText={setLogin}
                   onFocus={() => {
                     setIsKeyboardShowing(true);
+                    setIsLoginFocused(true);
                   }}
                   onBlur={() => {
                     setIsKeyboardShowing(false);
+                    setIsLoginFocused(false);
                   }}
+                  styleProps={
+                    isLoginFocused && {
+                    borderColor: "#FF6C00",
+                    backgroundColor: "#fff",
+                    }
+                  }
                 />
                 <Input
                   placeholder="Адреса електронної пошти"
+                  value={email}
+                  onChangeText={setEmail}
                   onFocus={() => {
                     setIsKeyboardShowing(true);  
+                    setIsEmailFocused(true);
                   }}
                   onBlur={() => {
-                    setIsKeyboardShowing(false);          
-                  }}           
+                    setIsKeyboardShowing(false); 
+                    setIsEmailFocused(false);
+                  }}  
+                  styleProps={
+                    isEmailFocused && {
+                      borderColor: "#FF6C00",
+                      backgroundColor: "#fff",
+                    }
+                  }
                 />
                 <View style={{ position: "relative" }}>
                   <Input
                     placeholder="Пароль"
-                   secureTextEntry={showPassword && true}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={showPassword && true}
                     onFocus={() => {
-                      setIsKeyboardShowing(true);            
+                      setIsKeyboardShowing(true); 
+                      setIsPasswordFocused(true);
                     }}
                     onBlur={() => {
                       setIsKeyboardShowing(false);
+                      setIsPasswordFocused(false);
                     }}
-                    styleProps={{             
+                    styleProps={{
+                      ...(isPasswordFocused && {
+                        borderColor: "#FF6C00",
+                        backgroundColor: "#fff",
+                      }),
                       ...(showPassword
                         ? { paddingRight: 100 }
                         : { paddingRight: 90 }),
@@ -87,7 +128,8 @@ const RegistrationScreen = () => {
                       position: "absolute",
                       right: 16,
                       top: 17,
-                    }} >
+                    }}
+                    onPress={toggleShowPassword}>
                     <Text
                       style={{
                         color: "#1B4371",
@@ -101,6 +143,7 @@ const RegistrationScreen = () => {
                   <CustomButton
                     text={"Зареєстуватися"}
                     styleProps={{ marginTop: 27 }}
+                    onPress={onRegistration}
                   /> )}
               </View>
               {!isKeyboardShowing && (
