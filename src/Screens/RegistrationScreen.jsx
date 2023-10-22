@@ -1,210 +1,322 @@
-import { useState } from "react";
+import { useState } from 'react';
+import { Dimensions, StyleSheet } from 'react-native';
+import * as DocumentPicker from 'expo-document-picker';
+
 import {
-  Image,
-  ImageBackground,
-  Keyboard,
-  KeyboardAvoidingView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
-} from "react-native";
-import Input from "../components/Input";
-import CustomButton from "../components/btn";
+  ImageBackground,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  Text,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from 'react-native';
+
+import backgroundImg from '../assets/images/backgroundIMG.jpg';
+import SvgAddButton from '../assets/svg/SvgAddButton';
+import { useNavigation } from '@react-navigation/native';
 
 const RegistrationScreen = () => {
-  
-  const [login, setLogin] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isEmailFocused, setIsEmailFocused] = useState(false);
-  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
-  const [isLoginFocused, setIsLoginFocused] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [isKeyboardShowing, setIsKeyboardShowing] = useState(false);
+  const navigation = useNavigation();
+  const [avatar, setAvatar] = useState(null);
+  const [login, setLogin] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const toggleShowPassword = () => setShowPassword((prev) => !prev);
+  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  const [isSecureText, setIsSecureText] = useState(true);
+  const [currentFocused, setCurrentFocused] = useState('');
 
-  const onRegistration = () => {
-    setLogin("");
-    setEmail("");
-    setPassword("");
-    console.log(`Login: ${login}\nEmail: ${email}\nPassword: ${password}`);
+  const clearUserForm = () => {
+    setLogin('');
+    setEmail('');
+    setPassword('');
+  };
+
+  const onSubmitUserRegister = () => {
+    if (!login || !email || !password) return console.warn('Будь ласка заповніть поля');
+
+    console.log({ login, email, password, avatar });
+
+    handleKeyboardHide();
+    navigation.navigate('Home', { user: { login, email, password } });
+    clearUserForm();
+  };
+
+  const onLoadAvatar = async () => {
+    const avatarImg = await DocumentPicker.getDocumentAsync({
+      type: 'image/*',
+    });
+
+    if (avatarImg.type === 'cancel') return setAvatar(null);
+
+    setAvatar(avatarImg);
+  };
+
+  const handleFocus = (currentFocusInput = '') => {
+    setIsShowKeyboard(true);
+    setCurrentFocused(currentFocusInput);
+  };
+
+  const handleKeyboardHide = () => {
+    setIsShowKeyboard(false);
+    setCurrentFocused('');
+    Keyboard.dismiss();
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <ImageBackground
-          source={require("../assets/images/backgroundIMG.jpg")}
-          style={styles.bgImg}
-        >
-          <KeyboardAvoidingView
-            behavior={Platform.OS == "ios" ? "padding" : ""}
-          >
-            <View
-              style={
-                isKeyboardShowing
-                  ? { ...styles.wrapper, paddingBottom: 0 }
-                  : styles.wrapper
-              }
-            >
-              <View style={styles.userAvatar}>
-                <TouchableOpacity
-                  activeOpacity={0.6}
-                  style={{ position: "absolute", top: 81, left: 107 }}
-                >
-                  <Image source={require("../assets/images/plus.png")} />
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.title}>Реєстрація</Text>
-              <View style={styles.formWrapper}>
-                <Input
-                  placeholder="Логін"
-                  value={login}
-                  onChangeText={setLogin}
-                  onFocus={() => {
-                    setIsKeyboardShowing(true);
-                    setIsLoginFocused(true);
-                  }}
-                  onBlur={() => {
-                    setIsKeyboardShowing(false);
-                    setIsLoginFocused(false);
-                  }}
-                  styleProps={
-                    isLoginFocused && {
-                    borderColor: "#FF6C00",
-                    backgroundColor: "#fff",
-                    }
-                  }
+    <TouchableWithoutFeedback onPress={handleKeyboardHide}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ImageBackground source={backgroundImg} style={styles.bgContainer}>
+          <View style={styles.contentWrapper}>
+            <View style={styles.avatarWrapper}>
+              <Image style={styles.avatar} source={avatar} />
+              <TouchableOpacity
+                style={avatar ? styles.btnAddAvatarLoad : styles.btnAddAvatar}
+                onPress={onLoadAvatar}
+              >
+                <SvgAddButton
+                  style={avatar ? styles.btnAddAvatarSvgLoad : styles.btnAddAvatarSvg}
                 />
-                <Input
-                  placeholder="Адреса електронної пошти"
-                  value={email}
-                  onChangeText={setEmail}
-                  onFocus={() => {
-                    setIsKeyboardShowing(true);  
-                    setIsEmailFocused(true);
-                  }}
-                  onBlur={() => {
-                    setIsKeyboardShowing(false); 
-                    setIsEmailFocused(false);
-                  }}  
-                  styleProps={
-                    isEmailFocused && {
-                      borderColor: "#FF6C00",
-                      backgroundColor: "#fff",
-                    }
-                  }
-                />
-                <View style={{ position: "relative" }}>
-                  <Input
-                    placeholder="Пароль"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={showPassword && true}
-                    onFocus={() => {
-                      setIsKeyboardShowing(true); 
-                      setIsPasswordFocused(true);
-                    }}
-                    onBlur={() => {
-                      setIsKeyboardShowing(false);
-                      setIsPasswordFocused(false);
-                    }}
-                    styleProps={{
-                      ...(isPasswordFocused && {
-                        borderColor: "#FF6C00",
-                        backgroundColor: "#fff",
-                      }),
-                      ...(showPassword
-                        ? { paddingRight: 100 }
-                        : { paddingRight: 90 }),
-                    }}
-                  />
-                  <TouchableOpacity
-                    activeOpacity={0.6}
-                    style={{
-                      position: "absolute",
-                      right: 16,
-                      top: 17,
-                    }}
-                    onPress={toggleShowPassword}>
-                    <Text
-                      style={{
-                        color: "#1B4371",
-                        fontSize: 16,
-                      }} >
-                         {showPassword ? "Показати" : "Приховати"}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                {!isKeyboardShowing && (
-                  <CustomButton
-                    text={"Зареєстуватися"}
-                    styleProps={{ marginTop: 27 }}
-                    onPress={onRegistration}
-                  /> )}
-              </View>
-              {!isKeyboardShowing && (
-                <TouchableOpacity activeOpacity={0.7}>
-                  <Text style={styles.noAccountMessage}>
-                    Вже є акаунт?&nbsp;
-                    <Text>Увійти</Text>
-                  </Text>
-                </TouchableOpacity>)}
+              </TouchableOpacity>
             </View>
-          </KeyboardAvoidingView>
+            <Text style={{ ...styles.title, marginTop: 92 }}>Реєстрація</Text>
+            <TextInput
+              style={{
+                ...styles.input,
+                backgroundColor: currentFocused === 'login' ? '#ffffff' : '#f6f6f6',
+                borderColor: currentFocused === 'login' ? '#ff6c00' : '#e8e8e8',
+              }}
+              placeholder="Логін"
+              placeholderTextColor="#bdbdbd"
+              autoComplete="username"
+              autoCapitalize="none"
+              value={login}
+              onChangeText={setLogin}
+              onFocus={() => handleFocus('login')}
+            />
+            <TextInput
+              style={{
+                ...styles.input,
+                backgroundColor: currentFocused === 'email' ? '#ffffff' : '#f6f6f6',
+                borderColor: currentFocused === 'email' ? '#ff6c00' : '#e8e8e8',
+              }}
+              placeholder="Адреса електронної пошти"
+              placeholderTextColor="#bdbdbd"
+              autoComplete="email"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
+              onFocus={() => handleFocus('email')}
+            />
+            <View
+              style={{
+                ...styles.passWrapper,
+                marginBottom: isShowKeyboard ? 159 : 43,
+              }}
+            >
+              <TextInput
+                style={{
+                  ...styles.input,
+                  ...styles.inputLast,
+
+                  backgroundColor: currentFocused === 'password' ? '#ffffff' : '#f6f6f6',
+                  borderColor: currentFocused === 'password' ? '#ff6c00' : '#e8e8e8',
+                }}
+                placeholder="Пароль"
+                placeholderTextColor="#bdbdbd"
+                autoComplete="password"
+                autoCapitalize="none"
+                secureTextEntry={isSecureText}
+                value={password}
+                onChangeText={setPassword}
+                onFocus={() => handleFocus('password')}
+              />
+              <TouchableOpacity
+                style={styles.btnPassShow}
+                onPress={() => password !== '' && setIsSecureText(prevState => !prevState)}
+              >
+                <Text style={styles.btnPassShowText}>Показати</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View>
+              <TouchableOpacity style={styles.btn} onPress={onSubmitUserRegister}>
+                <Text style={styles.btnText}>Зареєструватися</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.link} onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.linkText}>
+                  Вже є акаунт? <Text style={styles.linkTextUnderline}>Увійти</Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </ImageBackground>
-      </View>
+      </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
 };
 
+export default RegistrationScreen;
+
 const styles = StyleSheet.create({
-  container: {
+  keyboardView: {
     flex: 1,
   },
-  userAvatar: {
-    position: "absolute",
-    top: -60,
-    left: 128,
-    zIndex: 100,
-    width: 120,
-    height: 120,
-    backgroundColor: "#F6F6F6",
-    borderRadius: 16,
+
+  bgContainer: {
+    width: '100%',
+    height: '100%',
+
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+
+    resizeMode: 'cover',
+    justifyContent: 'center',
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
   },
-  bgImg: {
-    flex: 1,
-    resizeMode: "cover",
-    justifyContent: "flex-end",
-  },
-  wrapper: {
-    position: "relative",
-    backgroundColor: "#fff",
+
+  contentWrapper: {
+    paddingHorizontal: 16,
+
+    width: '100%',
+    backgroundColor: '#fff',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    paddingBottom: 78,
   },
   title: {
-    color: "#212121",
-    textAlign: "center",
+    fontFamily: 'Roboto',
+    fontStyle: 'normal',
+    fontWeight: 'medium',
     fontSize: 30,
-    marginTop: 92,
-    marginBottom: 33,
-    fontFamily: "Roboto-medium",
+    lineHeight: 35,
+    textAlign: 'center',
+
+    marginTop: 32,
+    marginBottom: 32,
+    color: '#212121',
   },
-  formWrapper: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  noAccountMessage: {
-    color: "#1B4371",
-    textAlign: "center",
+  input: {
+    height: 50,
     fontSize: 16,
-    marginRight: 3,
+    padding: 16,
+    marginBottom: 16,
+
+    color: '#212121',
+    backgroundColor: '#f6f6f6',
+
+    borderWidth: 1,
+    borderColor: '#e8e8e8',
+    borderRadius: 8,
+  },
+  inputLast: {
+    marginBottom: 0,
+  },
+  passWrapper: {
+    marginBottom: 43,
+  },
+  btnPassShow: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    alignSelf: 'center',
+
+    padding: 16,
+
+    backgroundColor: 'transparent',
+  },
+  btnPassShowText: {
+    color: '#1B4371',
+  },
+
+  btn: {
+    alignItems: 'center',
+    padding: 16,
+
+    backgroundColor: '#ff6c00',
+    borderRadius: 100,
+  },
+  btnText: {
+    color: '#ffffff',
+  },
+
+  link: {
+    alignItems: 'center',
+
+    marginTop: 16,
+  },
+  linkText: {
+    color: '#1B4371',
+    marginBottom: 45,
+  },
+  linkTextUnderline: {
+    textDecorationLine: 'underline',
+  },
+
+  //
+  avatarWrapper: {
+    position: 'absolute',
+    top: -60,
+    alignSelf: 'center',
+
+    width: 120,
+    height: 120,
+
+    backgroundColor: '#f6f6f6',
+    borderRadius: 16,
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+  },
+  btnAddAvatar: {
+    position: 'absolute',
+    bottom: 14,
+    right: -12.5,
+
+    alignItems: 'center',
+    alignContent: 'center',
+
+    width: 25,
+    height: 25,
+
+    color: '#ff6c00',
+    backgroundColor: '#ffffff',
+    borderRadius: 50,
+  },
+  btnAddAvatarLoad: {
+    position: 'absolute',
+    bottom: 14,
+    right: -12.5,
+
+    alignItems: 'center',
+    alignContent: 'center',
+
+    width: 25,
+    height: 25,
+
+    color: '#ff6c00',
+    backgroundColor: '#ffffff',
+    borderRadius: 50,
+
+    transform: [{ rotate: '45deg' }],
+  },
+  btnAddAvatarSvg: {
+    fill: '#ff6c00',
+    stroke: '#ff6c00',
+    backgroundColor: '#ffffff',
+  },
+  btnAddAvatarSvgLoad: {
+    fill: '#bdbdbd',
+    stroke: '#e8e8e8',
+    backgroundColor: '#ffffff',
   },
 });
-
-export default RegistrationScreen;
