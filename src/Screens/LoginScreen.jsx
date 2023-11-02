@@ -1,223 +1,223 @@
-import { useState } from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-
 import {
-  View,
-  ImageBackground,
-  TouchableOpacity,
-  TextInput,
+  StyleSheet,
   Text,
+  View,
+  TextInput,
+  Alert,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
+  ImageBackground,
   TouchableWithoutFeedback,
+  TouchableOpacity,
+  Keyboard,
 } from 'react-native';
+import React, { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 
-import backgroundImg from '../assets/images/backgroundIMG.jpg';
+const wallpaper = require('../assets/images/backgroundIMG.jpg');
 
-const LoginScreen = () => {
+export default function LoginScreen() {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [hidePassword, setHidePassword] = useState(true);
+  const [isShowKeybord, setIsShowKeybord] = useState(false);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
-  const [isSecureText, setIsSecureText] = useState(true);
-  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
-  const [currentFocused, setCurrentFocused] = useState('');
+  const handleSubmit = () => {
+    if (!email || !password) {
+      Alert.alert('Поле не може бути пустим!');
+      return;
+    }
+    if (!validateEmail(email)) {
+      Alert.alert('Невірний формат електронної пошти!');
+      return;
+    }
+    navigation.navigate('Home', {
+      screen: 'PostsScreen',
+      params: {
+        user: 'e-mail@example.com',
+      },
+    });
+    clearForm();
+  };
 
-  const clearUserForm = () => {
+  const clearForm = () => {
     setEmail('');
     setPassword('');
   };
 
-  const onSubmitUserRegister = () => {
-    if (!email.trim() || !password.trim()) return console.warn('Будь ласка заповніть поля');
-
-    console.log({ email, password });
-
-    handleKeyboardHide();
-    navigation.navigate('Home', { user: { email, password } });
-    clearUserForm();
+  const onChangeEmail = text => {
+    setEmail(text.trim());
   };
 
-  const handleFocus = (currentFocusInput = '') => {
-    setIsShowKeyboard(true);
-    setCurrentFocused(currentFocusInput);
+  const onChangePassword = text => {
+    setPassword(text.trim());
   };
 
-  const handleKeyboardHide = () => {
-    setIsShowKeyboard(false);
-    setCurrentFocused('');
-    Keyboard.dismiss();
+  const validateEmail = email => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   return (
-    <TouchableWithoutFeedback onPress={handleKeyboardHide}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ImageBackground source={backgroundImg} style={styles.bgContainer}>
-          <View style={styles.contentWrapper}>
-            <Text style={styles.title}>Увійти</Text>
-            <TextInput
-              style={{
-                ...styles.input,
-                backgroundColor: currentFocused === 'email' ? '#ffffff' : '#f6f6f6',
-                borderColor: currentFocused === 'email' ? '#ff6c00' : '#e8e8e8',
-              }}
-              placeholder="Адреса електронної пошти"
-              placeholderTextColor="#bdbdbd"
-              autoComplete="email"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-              onFocus={() => handleFocus('email')}
-            />
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss(), setIsShowKeybord(false);
+      }}
+    >
+      <View style={styles.container}>
+        <ImageBackground source={wallpaper} style={styles.backgroundImage}>
+         <KeyboardAvoidingView
+              behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+              style={styles.containerKeyBoard}>
             <View
-              style={{
-                ...styles.passWrapper,
-                marginBottom: isShowKeyboard ? 92 : 43,
-              }}
+              style={isShowKeybord ? { ...styles.innerContainer, paddingBottom: 0 } : styles.innerContainer}
             >
+              <Text style={styles.title}>Увійти</Text>
               <TextInput
-                style={{
-                  ...styles.input,
-                  ...styles.inputLast,
-
-                  backgroundColor: currentFocused === 'password' ? '#ffffff' : '#f6f6f6',
-                  borderColor: currentFocused === 'password' ? '#ff6c00' : '#e8e8e8',
+                style={[styles.input, isEmailFocused && styles.inputFocus]}
+                onFocus={() => {
+                  setIsShowKeybord(true);
+                  setIsEmailFocused(true);
+                  setIsPasswordFocused(false);
                 }}
-                placeholder="Пароль"
-                placeholderTextColor="#bdbdbd"
-                autoComplete="password"
-                autoCapitalize="none"
-                secureTextEntry={isSecureText}
-                value={password}
-                onChangeText={setPassword}
-                onFocus={() => handleFocus('password')}
+                onBlur={() => setIsEmailFocused(false)}
+                onChangeText={onChangeEmail}
+                value={email}
+                placeholder="Адреса електронної пошти"
+                autoComplete="email"
+                keyboardType="email-address"
               />
-              <TouchableOpacity
-                style={styles.btnPassShow}
-                onPress={() => password !== '' && setIsSecureText(prevState => !prevState)}
-              >
-                <Text style={styles.btnPassShowText}>Показати</Text>
-              </TouchableOpacity>
-            </View>
 
-            <TouchableOpacity style={styles.btn} onPress={onSubmitUserRegister}>
-              <Text style={styles.btnText}>Увійти</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.link}
-              onPress={() => navigation.navigate('Regestration')}
-            >
-              <Text style={styles.linkText}>
-                Немає акаунту? <Text style={styles.linkTextUnderline}>Зареєструватися</Text>
+              <TextInput
+                style={[styles.input, isPasswordFocused && styles.inputFocus]}
+                onFocus={() => {
+                  setIsShowKeybord(true);
+                  setIsPasswordFocused(true);
+                  setIsEmailFocused(false);
+                }}
+                onBlur={() => setIsPasswordFocused(false)}
+                onChangeText={onChangePassword}
+                value={password}
+                placeholder="Пароль"
+                autoComplete="password"
+                secureTextEntry={hidePassword}
+              />
+
+              <TouchableOpacity
+                style={styles.showPassword}
+                activeOpacity={0.5}
+                onPress={() => {
+                  setHidePassword(!hidePassword);
+                }}
+              >
+                <Text style={styles.showPasswordText}>
+                  {hidePassword ? 'Показати' : 'Приховати'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                activeOpacity={0.5}
+                onPress={handleSubmit}
+              >
+                <Text style={styles.titlebutton}>Увійти</Text>
+              </TouchableOpacity>
+              <Text style={styles.titletext}>
+                Немає акаунту?
+                <Text
+                  onPress={() => navigation.navigate('RegistrationScreen')}
+                  style={{ color: '#FF6C00', textDecorationLine: 'underline' }}
+                >
+                  {' '}
+                  Зареєструватися
+                </Text>
               </Text>
-            </TouchableOpacity>
-          </View>
+            </View>
+          </KeyboardAvoidingView>
         </ImageBackground>
-      </KeyboardAvoidingView>
+        <StatusBar style="auto" />
+      </View>
     </TouchableWithoutFeedback>
   );
-};
-
-export default LoginScreen;
+}
 
 const styles = StyleSheet.create({
-  keyboardView: {
+  container: {
     flex: 1,
-    width:'100%'
+    alignItems: 'center',
   },
-
-  bgContainer: {
+  backgroundImage: {
+    flex: 1,
+    justifyContent: 'flex-end',
     width: '100%',
-    height: '100%',
-
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-
-    resizeMode: 'cover',
-    justifyContent: 'center',
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
   },
-
-  contentWrapper: {
-    paddingHorizontal: 16,
-
+  containerKeyBoard: {
+    justifyContent: 'flex-end',
+  },
+  innerContainer: {
     width: '100%',
-    backgroundColor: '#fff',
+    alignItems: 'center',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
+    backgroundColor: '#fff',
+    // paddingBottom: 111,
   },
   title: {
-    fontFamily: 'Roboto',
-    fontStyle: 'normal',
-    fontWeight: 'medium',
-    fontSize: 30,
-    lineHeight: 35,
+    color: '#212121',
     textAlign: 'center',
-
+    fontSize: 30,
+    fontFamily: 'Roboto',
+    fontWeight: 'medium',
+    lineHeight: 35,
+    letterSpacing: 0.3,
     marginTop: 32,
     marginBottom: 32,
-    color: '#212121',
   },
   input: {
+    width: 343,
     height: 50,
-    fontSize: 16,
-    padding: 16,
-    marginBottom: 16,
-
-    color: '#212121',
-    backgroundColor: '#f6f6f6',
-
-    borderWidth: 1,
-    borderColor: '#e8e8e8',
+    margin: 8,
     borderRadius: 8,
+    padding: 10,
+    backgroundColor: '#F6F6F6',
   },
-  inputLast: {
-    marginBottom: 0,
+  inputFocus: {
+    borderColor: '#FF6C00',
+    borderWidth: 1,
   },
-  passWrapper: {
-    marginBottom: 43,
-  },
-  btnPassShow: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    alignSelf: 'center',
-
-    padding: 16,
-
-    backgroundColor: 'transparent',
-  },
-  btnPassShowText: {
-    color: '#1B4371',
-  },
-
-  btn: {
+  button: {
+    backgroundColor: '#FF6C00',
+    height: 50,
+    width: 343,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
-
-    backgroundColor: '#ff6c00',
     borderRadius: 100,
+    marginTop: 20,
   },
-  btnText: {
-    color: '#ffffff',
+  titlebutton: {
+    color: '#FFF',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontWeight: 'normal',
   },
-
-  link: {
-    alignItems: 'center',
-
-    marginTop: 16,
-    marginBottom: 111,
+  showPassword: {
+    top: -44,
+    left: 110,
   },
-  linkText: {
+  showPasswordText: {
     color: '#1B4371',
+    fontFamily: 'Roboto',
+    fontWeight: 'normal',
   },
-  linkTextUnderline: {
-    textDecorationLine: 'underline',
+  titletext: {
+    color: '#1B4371',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontWeight: 'normal',
+    textAlign: 'center',
+    marginTop: 16,
   },
 });

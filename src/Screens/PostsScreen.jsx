@@ -1,63 +1,54 @@
-import { Image } from 'react-native';
-import { StyleSheet } from 'react-native';
-import { Text, View } from 'react-native';
-import avatarImg from '../assets/images/avatar.png'
+import React from 'react';
+import { View, ScrollView } from 'react-native';
 
-const PostScreen = () => {
+import PostCard from '../components/PostCard';
+import Profile from '../components/Profile';
+const avatar = require('../assets/images/avatar.png');
+import posts from '../data/posts.js';
+
+const PostsScreen = () => {
   return (
-    <View style={styles.container}>
-      <View style={styles.avatarWrapper}>
-        <Image source={avatarImg} style={styles.avatarImg} />
-        <View>
-          <Text style={styles.avatarName}>Natali Romanova</Text>
-          <Text style={styles.avatarEmail}>email@example.com</Text>
-        </View>
-      </View>
-      <View style={styles.navTabs}></View>
+    <View
+      style={{
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#ffffff',
+      }}
+    >
+      <Profile
+        avatar={avatar}
+        name="Natali Romanova"
+        email="email@example.com"
+      />
+      <ScrollView
+        style={{ margin: 0, padding: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {posts.map(
+          ({
+            img,
+            description,
+            likes,
+            comments,
+            locationName,
+            geoLocation,
+          }) => {
+            return (
+              <PostCard
+                key={description}
+                image={img}
+                description={description}
+                likes={likes}
+                comments={comments}
+                locationName={locationName}
+                geoLocation={geoLocation}
+              />
+            );
+          }
+        )}
+      </ScrollView>
     </View>
   );
 };
 
-export default PostScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-
-    paddingHorizontal: 16,
-    paddingVertical: 32,
-
-    backgroundColor: '#fff',
-  },
-  avatarWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatarImg: {
-    width: 60,
-    height: 60,
-
-    marginRight: 8,
-
-    backgroundColor: '#f6f6f6',
-    borderRadius: 16,
-  },
-  avatarName: {
-    fontFamily: 'Roboto',
-    fontStyle: 'normal',
-    fontWeight: 'bold',
-    fontSize: 13,
-    lineHeight: 15,
-
-    color: '#212121',
-  },
-  avatarEmail: {
-    fontFamily: 'Roboto',
-    fontStyle: 'normal',
-    fontWeight: 'normal',
-    fontSize: 11,
-    lineHeight: 13,
-
-    color: 'rgba(33, 33, 33, 0.8)',
-  },
-});
+export default PostsScreen;
